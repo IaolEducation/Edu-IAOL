@@ -1,18 +1,13 @@
 "use client"
 
-import { useChat } from "@/providers/chat-provider"
 import { ChatButton } from "./chat-button"
-import { ChatInterface } from "./chat-interface"
-import { AnimatePresence } from "framer-motion"
+import { usePathname } from "next/navigation"
 
 export function Chat() {
-  const { isChatOpen } = useChat()
+  const pathname = usePathname()
 
-  return (
-    <>
-      <ChatButton />
-      <AnimatePresence>{isChatOpen && <ChatInterface />}</AnimatePresence>
-    </>
-  )
+  if (pathname.startsWith("/messages")) return null
+
+  return <ChatButton />
 }
 

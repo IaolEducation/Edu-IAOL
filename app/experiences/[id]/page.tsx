@@ -184,7 +184,7 @@ export default function ExperiencePage() {
       </div>
     )
   }
-const profilePicture = getRandomProfileImage()
+const profilePicture = experience.profileImage || getRandomProfileImage()
 const CompanyLogo = getCompanyLogo()
   return (
     <div className="container px-4 md:px-6 py-8 md:py-12">
@@ -486,7 +486,7 @@ const CompanyLogo = getCompanyLogo()
                   <div key={relatedExp.id}>
                     <div className="flex items-start gap-3">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={profilePicture} alt={relatedExp.studentName} />
+                        <AvatarImage src={relatedExp.profileImage || profilePicture} alt={relatedExp.studentName} />
                         <AvatarFallback>{relatedExp.studentName.substring(0, 2)}</AvatarFallback>
                       </Avatar>
                       <div className="space-y-1">

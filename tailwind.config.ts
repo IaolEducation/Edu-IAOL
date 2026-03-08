@@ -80,16 +80,23 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "chat-border-glow": {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "chat-border-glow": "chat-border-glow 4s ease-in-out infinite",
+      },
+      backgroundSize: {
+        "300": "300% 300%",
       },
     },
   },
   plugins: [
-    // Resolve from cwd so Tailwind finds the plugin when run from any context
-    require(require.resolve("tailwindcss-animate", { paths: [process.cwd()] })),
+    require("tailwindcss-animate"),
     require("@tailwindcss/typography"),
   ],
 } satisfies Config

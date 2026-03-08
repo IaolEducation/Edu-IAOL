@@ -13,12 +13,12 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog"
 import {
   GraduationCap, BookOpen, Briefcase, Phone, Instagram, Linkedin,
   Facebook, AtSign, Lightbulb, UserPlus, UserCheck, ArrowLeft,
-  ExternalLink, Users, Calendar, MessageCircle, Mail, Building2, Megaphone,
+  ExternalLink, Users, Calendar, MessageCircle, Mail, Building2, Megaphone, MessageSquare,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -76,8 +76,37 @@ export default function UserProfilePage() {
   const [selectedAdvice, setSelectedAdvice] = useState<AdvicePost | null>(null)
   const [followers, setFollowers] = useState<Follower[]>([])
   const [showFollowers, setShowFollowers] = useState(false)
+  const [showMsgDisclaimer, setShowMsgDisclaimer] = useState(false)
+  const [startingChat, setStartingChat] = useState(false)
 
   const isOwnProfile = currentUser?.uid === uid
+
+  const startChat = async () => {
+    if (!currentUser || !profile) return
+    setStartingChat(true)
+    try {
+      const chatId = [currentUser.uid, uid].sort().join("_")
+      const { setDoc, doc, serverTimestamp } = await import("firebase/firestore")
+      await setDoc(doc(db, "chats", chatId), {
+        participants: [currentUser.uid, uid],
+        participantNames: {
+          [currentUser.uid]: currentUser.displayName || currentUser.email?.split("@")[0] || "Me",
+          [uid]: name,
+        },
+        participantPhotos: {
+          [currentUser.uid]: currentUser.photoURL || "",
+          [uid]: (profile as UserProfile & { photoURL?: string }).photoURL || "",
+        },
+        lastMessage: "",
+        lastMessageAt: serverTimestamp(),
+        createdAt: serverTimestamp(),
+        unreadCounts: { [currentUser.uid]: 0, [uid]: 0 },
+      }, { merge: true })
+      router.push(`/messages/${chatId}`)
+    } catch (e) { console.error(e) }
+    setStartingChat(false)
+    setShowMsgDisclaimer(false)
+  }
 
   useEffect(() => {
     if (!uid) return
@@ -186,14 +215,26 @@ export default function UserProfilePage() {
                   </div>
                 </div>
                 {!isOwnProfile && (
-                  <Button
-                    onClick={toggleFollow}
-                    disabled={loadingFollow}
-                    variant={isFollowing ? "secondary" : "default"}
-                    className="gap-2 shrink-0"
-                  >
-                    {isFollowing ? <><UserCheck className="h-4 w-4" /> Following</> : <><UserPlus className="h-4 w-4" /> Follow</>}
-                  </Button>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Button
+                      onClick={toggleFollow}
+                      disabled={loadingFollow}
+                      variant={isFollowing ? "secondary" : "default"}
+                      className="gap-2 shrink-0"
+                    >
+                      {isFollowing ? <><UserCheck className="h-4 w-4" /> Following</> : <><UserPlus className="h-4 w-4" /> Follow</>}
+                    </Button>
+                    {currentUser && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1.5 shrink-0"
+                        onClick={() => setShowMsgDisclaimer(true)}
+                      >
+                        <MessageSquare className="h-4 w-4" /> Message
+                      </Button>
+                    )}
+                  </div>
                 )}
                 {isOwnProfile && (
                   <Button asChild variant="outline" size="sm" className="gap-1.5">
@@ -437,6 +478,48 @@ export default function UserProfilePage() {
               })}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Message Disclaimer Dialog ── */}
+      <Dialog open={showMsgDisclaimer} onOpenChange={setShowMsgDisclaimer}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <MessageSquare className="h-5 w-5 text-primary" />
+              Message {name}
+            </DialogTitle>
+            <DialogDescription className="text-sm leading-relaxed pt-1">
+              Before you start a conversation, please read and agree to the following:
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-3 text-xs text-amber-800 dark:text-amber-300 space-y-1.5">
+              <p className="font-semibold">⚠️ Community Guidelines</p>
+              <ul className="space-y-1 list-disc list-inside">
+                <li>Be respectful and courteous at all times</li>
+                <li>Do not send spam, harassment, or inappropriate content</li>
+                <li>Do not share personal financial or sensitive data</li>
+                <li>Do not use this chat for illegal activities</li>
+              </ul>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Misuse of the messaging system may result in a permanent account suspension.
+              By clicking &quot;I Agree&quot;, you acknowledge these guidelines.
+            </p>
+          </div>
+          <DialogFooter className="flex gap-2 sm:gap-2">
+            <Button variant="outline" size="sm" onClick={() => setShowMsgDisclaimer(false)}>
+              Cancel
+            </Button>
+            <Button size="sm" onClick={startChat} disabled={startingChat} className="gap-1.5">
+              {startingChat ? (
+                <><span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" /> Starting…</>
+              ) : (
+                <><MessageSquare className="h-3.5 w-3.5" /> I Agree, Start Chat</>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

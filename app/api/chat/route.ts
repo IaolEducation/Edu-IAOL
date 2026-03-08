@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
             "X-Title": "College Student Assistant",
           },
           body: JSON.stringify({
-            model: "meta-llama/llama-3.1-8b-instruct:free",
+            model: "deepseek/deepseek-chat-v3-0324:free",
             messages: formattedMessages,
             temperature: 0.7,
             max_tokens: 4096,

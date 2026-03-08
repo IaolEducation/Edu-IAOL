@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
 import type { UserType } from "@/contexts/auth-context"
 import { db, auth, saveUpdateToFirestore } from "@/lib/firebase"
-import { doc, getDoc, collection, addDoc, serverTimestamp, query, where, getDocs, updateDoc, deleteDoc } from "firebase/firestore"
+import { doc, getDoc, collection, addDoc, serverTimestamp, query, where, getDocs, updateDoc, deleteDoc, orderBy, Timestamp } from "firebase/firestore"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -35,7 +35,8 @@ import {
   Trash2, Lightbulb, Upload, ArrowRight, Clock, Phone, Instagram, Linkedin,
   Facebook, AtSign, Save, Users, ExternalLink, Settings, Building,
   Calendar, Award, Plus, Pencil, MoreVertical, Archive, ArchiveRestore,
-  Bookmark, BookmarkCheck, Megaphone,
+  Bookmark, BookmarkCheck, Megaphone, MessageCircle, Image as ImageIcon,
+  Link2, File, FileText,
 } from "lucide-react"
 import Link from "next/link"
 import { toast } from "@/hooks/use-toast"
@@ -69,6 +70,7 @@ interface AdvicePost { id: string; title: string; content: string; category: str
 interface Experience { id: any; studentName: string; branch: string; company: string; type: string; year: number; role?: string; package?: string; excerpt: string; companyType?: string }
 interface SavedItem { id: string; itemId: string; itemType: "advice" | "experience"; title: string; savedAt: any; meta?: string }
 interface UpdatePost { id: string; title: string; content: string; category: string; authorName: string; createdAt: any }
+interface SharedResource { id: string; title: string; description?: string; url?: string; fileUrl?: string; fileType?: "image" | "pdf" | "doc" | "other"; fileName?: string; type: "link" | "file"; category: string; createdAt: Timestamp | null }
 
 function getInitials(name: string | null | undefined, email: string | null | undefined): string {
   if (name?.trim()) return name.trim().split(" ").filter(Boolean).slice(0, 2).map((n) => n[0].toUpperCase()).join("")
@@ -157,7 +159,22 @@ function ProfileContent() {
   const [updateCategory, setUpdateCategory] = useState<"exam_update" | "education_tech" | "general">("general")
   const [uploadingUpdate, setUploadingUpdate] = useState(false)
 
+  const [mySharedResources, setMySharedResources] = useState<SharedResource[]>([])
+  const [loadingSharedResources, setLoadingSharedResources] = useState(false)
+
   const canUploadAdvice = true // All users (student, college_student, professional) can post advice
+
+  // Load shared resources
+  useEffect(() => {
+    if (!user) return
+    setLoadingSharedResources(true)
+    getDocs(query(collection(db, "shared_resources"), where("authorId", "==", user.uid), orderBy("createdAt", "desc")))
+      .then((snap) => {
+        setMySharedResources(snap.docs.map((d) => ({ id: d.id, ...d.data() } as SharedResource)))
+      })
+      .catch(() => {/* silent */})
+      .finally(() => setLoadingSharedResources(false))
+  }, [user])
 
   // Load all data
   useEffect(() => {
@@ -386,57 +403,20 @@ function ProfileContent() {
   const displayName = user.displayName || user.email?.split("@")[0] || "User"
 
   return (
-    <div className="container max-w-3xl py-8 md:py-12 space-y-6">
+    <div className="container max-w-3xl py-4 md:py-10 space-y-4 md:space-y-6">
 
       {/* ── Profile Header Card ── */}
       <Card>
-        <CardContent className="pt-6 pb-5">
-          <div className="flex items-start gap-5">
-            <Avatar className="h-20 w-20 shrink-0 border-2 border-primary/20 text-2xl font-bold">
-              <AvatarImage src={user.photoURL ?? undefined} alt={displayName} referrerPolicy="no-referrer" />
-              <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0 flex-1">
-                  {editingName ? (
-                    <div className="flex items-center gap-2 mb-1">
-                      <Input value={nameInput} onChange={(e) => setNameInput(e.target.value)} className="h-8 w-48" autoFocus
-                        onKeyDown={(e) => { if (e.key === "Enter") handleSaveName(); if (e.key === "Escape") setEditingName(false) }} />
-                      <Button size="sm" onClick={handleSaveName} disabled={savingName}>{savingName ? "…" : "Save"}</Button>
-                      <Button size="sm" variant="ghost" onClick={() => setEditingName(false)}>✕</Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <h1 className="text-xl font-bold truncate">{displayName}</h1>
-                      <button onClick={() => { setNameInput(user.displayName || ""); setEditingName(true) }} className="text-muted-foreground hover:text-foreground transition-colors">
-                        <Pencil className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  )}
-                  {username && <p className="text-sm text-muted-foreground">@{username}</p>}
-                  {user.userType && (
-                    <div className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium mt-1.5 ${TYPE_PILL[user.userType] || ""}`}>
-                      {USER_TYPE_ICONS[user.userType]}{USER_TYPE_LABELS[user.userType]}
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1.5 mt-1.5 text-xs text-muted-foreground">
-                    <Mail className="h-3 w-3" />{user.email}
-                    {user.emailVerified
-                      ? <span className="text-green-600 flex items-center gap-0.5"><CheckCircle2 className="h-3 w-3" /> Verified</span>
-                      : <span className="text-yellow-600 flex items-center gap-0.5"><AlertCircle className="h-3 w-3" /> Unverified</span>}
-                  </div>
-                </div>
+        <CardContent className="pt-5 pb-5">
+          <div className="relative flex flex-col items-center text-center gap-2">
 
-                {/* Settings button */}
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-1.5 shrink-0">
-                      <Settings className="h-4 w-4" /> Settings
-                    </Button>
-                  </SheetTrigger>
+            {/* Settings icon — top-right corner */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="absolute top-0 right-0 h-8 w-8 shrink-0">
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </SheetTrigger>
                   <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
                     <SheetHeader className="mb-6">
                       <SheetTitle className="flex items-center gap-2"><Settings className="h-5 w-5" /> Settings</SheetTitle>
@@ -561,18 +541,56 @@ function ProfileContent() {
                     </div>
                   </SheetContent>
                 </Sheet>
-              </div>
 
-              {/* Bio */}
-              {bio && <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{bio}</p>}
+            {/* Avatar — centered on top */}
+            <Avatar className="h-20 w-20 border-2 border-primary/20">
+              <AvatarImage src={user.photoURL ?? undefined} alt={displayName} referrerPolicy="no-referrer" />
+              <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
 
-              {/* Stats */}
-              <div className="mt-4 flex items-center gap-5 flex-wrap">
-                <span className="text-sm"><span className="font-bold">{followerCount || 0}</span> <span className="text-muted-foreground">followers</span></span>
-                <span className="text-sm"><span className="font-bold">{followingCount || 0}</span> <span className="text-muted-foreground">following</span></span>
-                <span className="text-sm"><span className="font-bold">{myAdvice.length || 0}</span> <span className="text-muted-foreground">advice posts</span></span>
-                <span className="text-sm"><span className="font-bold">{myExperiences.length || 0}</span> <span className="text-muted-foreground">experiences</span></span>
+            {/* Name + edit inline */}
+            {editingName ? (
+              <div className="flex items-center gap-2">
+                <Input value={nameInput} onChange={(e) => setNameInput(e.target.value)} className="h-8 w-40 text-center" autoFocus
+                  onKeyDown={(e) => { if (e.key === "Enter") handleSaveName(); if (e.key === "Escape") setEditingName(false) }} />
+                <Button size="sm" onClick={handleSaveName} disabled={savingName}>{savingName ? "…" : "Save"}</Button>
+                <Button size="sm" variant="ghost" onClick={() => setEditingName(false)}>✕</Button>
               </div>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-lg font-bold">{displayName}</h1>
+                <button onClick={() => { setNameInput(user.displayName || ""); setEditingName(true) }} className="text-muted-foreground hover:text-foreground transition-colors">
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+
+            {username && <p className="text-xs text-muted-foreground -mt-1">@{username}</p>}
+
+            {user.userType && (
+              <div className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-medium whitespace-nowrap ${TYPE_PILL[user.userType] || ""}`}>
+                <span className="[&>svg]:h-3.5 [&>svg]:w-3.5">{USER_TYPE_ICONS[user.userType]}</span>{USER_TYPE_LABELS[user.userType]}
+              </div>
+            )}
+
+            <div className="flex items-center gap-1 text-xs text-muted-foreground flex-wrap justify-center">
+              <Mail className="h-3 w-3 shrink-0" /><span className="truncate max-w-[200px]">{user.email}</span>
+              {user.emailVerified
+                ? <span className="text-green-600 flex items-center gap-0.5 ml-1"><CheckCircle2 className="h-3 w-3" /> Verified</span>
+                : <span className="text-yellow-600 flex items-center gap-0.5 ml-1"><AlertCircle className="h-3 w-3" /> Unverified</span>}
+            </div>
+
+            {/* Bio */}
+            {bio && <p className="text-xs text-muted-foreground leading-relaxed px-2 -mt-0.5">{bio}</p>}
+
+            {/* Stats */}
+            <div className="flex items-center gap-4 flex-wrap justify-center pt-1">
+              <span className="text-xs"><span className="font-bold">{followerCount || 0}</span> <span className="text-muted-foreground">followers</span></span>
+              <span className="text-xs"><span className="font-bold">{followingCount || 0}</span> <span className="text-muted-foreground">following</span></span>
+              <span className="text-xs"><span className="font-bold">{myAdvice.length || 0}</span> <span className="text-muted-foreground">advice</span></span>
+              <span className="text-xs"><span className="font-bold">{myExperiences.length || 0}</span> <span className="text-muted-foreground">experiences</span></span>
             </div>
           </div>
         </CardContent>
@@ -627,6 +645,9 @@ function ProfileContent() {
         )}
         <Button asChild variant="outline" className="gap-2">
           <Link href="/submit"><Upload className="h-4 w-4" /> Submit Experience</Link>
+        </Button>
+        <Button asChild variant="outline" className="gap-2">
+          <Link href="/messages"><MessageCircle className="h-4 w-4" /> Messages</Link>
         </Button>
         <Button asChild variant="ghost" size="sm" className="gap-1.5 text-muted-foreground ml-auto">
           <Link href={`/community/${user.uid}`}><ExternalLink className="h-3.5 w-3.5" /> View Public Profile</Link>
@@ -926,6 +947,64 @@ function ProfileContent() {
         )}
         </CardContent>
       </Card>
+
+      {/* ── My Shared Resources ── */}
+      {(mySharedResources.length > 0 || loadingSharedResources) && (
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Upload className="h-4 w-4 text-primary" /> My Shared Resources
+              </CardTitle>
+              <Button asChild variant="outline" size="sm" className="text-xs">
+                <Link href="/resources">View All</Link>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {loadingSharedResources ? (
+              <div className="flex justify-center py-6">
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {mySharedResources.map((r) => (
+                  <div key={r.id} className="flex items-start gap-3 rounded-lg border p-3">
+                    <div className="mt-0.5 shrink-0">
+                      {r.fileType === "image" ? <ImageIcon className="h-4 w-4 text-blue-500" /> :
+                        r.fileType === "pdf" ? <FileText className="h-4 w-4 text-red-500" /> :
+                        r.type === "link" ? <Link2 className="h-4 w-4 text-blue-400" /> :
+                        <File className="h-4 w-4 text-orange-500" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{r.title}</p>
+                      {r.description && <p className="text-xs text-muted-foreground line-clamp-1">{r.description}</p>}
+                      {r.fileType === "image" && r.fileUrl && (
+                        <a href={r.fileUrl} target="_blank" rel="noopener noreferrer">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={r.fileUrl} alt={r.title} className="mt-2 rounded-lg max-h-32 object-cover border" />
+                        </a>
+                      )}
+                    </div>
+                    <div className="shrink-0">
+                      {r.url && (
+                        <a href={r.url} target="_blank" rel="noopener noreferrer">
+                          <Button variant="ghost" size="icon" className="h-7 w-7"><ExternalLink className="h-3.5 w-3.5" /></Button>
+                        </a>
+                      )}
+                      {r.fileUrl && r.fileType !== "image" && (
+                        <a href={r.fileUrl} target="_blank" rel="noopener noreferrer" download={r.fileName}>
+                          <Button variant="ghost" size="icon" className="h-7 w-7"><ArrowRight className="h-3.5 w-3.5" /></Button>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Edit Advice Dialog */}
       <Dialog open={!!editingPost} onOpenChange={(o) => !o && setEditingPost(null)}>

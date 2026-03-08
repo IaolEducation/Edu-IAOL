@@ -6,10 +6,12 @@ import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
 import { useAuth } from "@/contexts/auth-context"
-import { Menu, X, User, LogOut, Shield } from "lucide-react"
+import { Menu, X, User, LogOut, Shield, MessageCircle } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Image from "next/image"
+import { db } from "@/lib/firebase"
+import { collection, query, where, onSnapshot } from "firebase/firestore"
 
 const NAV_LINKS = [
   { href: "/resources", label: "Resources" },
@@ -20,23 +22,39 @@ const NAV_LINKS = [
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(true)
+  const [totalUnread, setTotalUnread] = useState(0)
   const lastScrollY = useRef(0)
   const pathname = usePathname()
   const { user, isAdmin, logout } = useAuth()
   const navRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
 
+  // Subscribe to unread message counts
+  useEffect(() => {
+    if (!user) { setTotalUnread(0); return }
+    const q = query(
+      collection(db, "chats"),
+      where("participants", "array-contains", user.uid),
+    )
+    const unsub = onSnapshot(q, (snap) => {
+      let count = 0
+      snap.docs.forEach((d) => {
+        const data = d.data()
+        count += data.unreadCounts?.[user.uid] || 0
+      })
+      setTotalUnread(count)
+    })
+    return () => unsub()
+  }, [user])
+
   useEffect(() => {
     const handleScroll = () => {
       const currentY = window.scrollY
-      // Always show at the very top
       if (currentY <= 10) {
         setIsVisible(true)
       } else if (currentY < lastScrollY.current) {
-        // Scrolling up → show
         setIsVisible(true)
       } else if (currentY > lastScrollY.current + 5) {
-        // Scrolling down (with small threshold to avoid jitter) → hide
         setIsVisible(false)
         setIsMenuOpen(false)
       }
@@ -46,9 +64,7 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  useEffect(() => {
-    setIsMenuOpen(false)
-  }, [pathname])
+  useEffect(() => { setIsMenuOpen(false) }, [pathname])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -67,18 +83,35 @@ export default function Header() {
   }, [isMenuOpen])
 
   const handleLogout = async () => {
-    try {
-      await logout()
-      setIsMenuOpen(false)
-    } catch (error) {
-      console.error("Logout error:", error)
-    }
+    try { await logout(); setIsMenuOpen(false) }
+    catch (error) { console.error("Logout error:", error) }
   }
 
   const linkClass = (href: string) =>
     `text-sm font-medium transition-colors hover:text-primary ${
       pathname === href || pathname?.startsWith(href + "/") ? "text-primary" : "text-muted-foreground"
     }`
+
+  const MessagesLink = ({ mobile = false }: { mobile?: boolean }) => (
+    <Link
+      href="/messages"
+      className={mobile
+        ? `text-sm font-medium flex items-center gap-1.5 ${pathname?.startsWith("/messages") ? "text-primary" : "text-muted-foreground hover:text-primary"}`
+        : `${linkClass("/messages")} flex items-center gap-1 relative`
+      }
+      onClick={() => mobile && setIsMenuOpen(false)}
+    >
+      <span className="relative">
+        <MessageCircle className="h-4 w-4" />
+        {totalUnread > 0 && (
+          <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground leading-none">
+            {totalUnread > 9 ? "9+" : totalUnread}
+          </span>
+        )}
+      </span>
+      <span>Messages</span>
+    </Link>
+  )
 
   return (
     <header className={`sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-transform duration-300 ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
@@ -87,12 +120,12 @@ export default function Header() {
         {/* Logo */}
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2 min-w-0">
-            <Image src="/nith.png" alt="Eduiaol" width={36} height={36} className="rounded-md shrink-0 w-8 h-8 sm:w-9 sm:h-9" />
-            <span className="hidden font-bold sm:inline-block text-foreground truncate">Eduiaol</span>
+            <Image src="/eduiaol_logo_transparent.png" alt="" width={36} height={36} className="rounded-md shrink-0 w-8 h-8 sm:w-9 sm:h-9" />
+            <Image src="/eduiaol_name_transparent.png" alt="Eduiaol" width={80} height={22} className="hidden h-5 w-auto sm:block sm:h-6 object-contain" />
           </Link>
         </div>
 
-        {/* Desktop nav — clean, universal links only */}
+        {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-5">
           {isAdmin && (
             <Link
@@ -107,6 +140,7 @@ export default function Header() {
           {NAV_LINKS.map((l) => (
             <Link key={l.href} href={l.href} className={linkClass(l.href)}>{l.label}</Link>
           ))}
+          {user && <MessagesLink />}
         </nav>
 
         {/* Right side actions */}
@@ -160,12 +194,15 @@ export default function Header() {
             ref={buttonRef}
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="md:hidden relative"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
             aria-expanded={isMenuOpen}
           >
             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {!isMenuOpen && totalUnread > 0 && (
+              <span className="absolute top-1 right-1 h-2.5 w-2.5 rounded-full bg-destructive border-2 border-background" />
+            )}
           </Button>
         </div>
       </div>
@@ -192,6 +229,7 @@ export default function Header() {
                 {l.label}
               </Link>
             ))}
+            {user && <MessagesLink mobile />}
 
             {user ? (
               <div className="flex flex-col gap-2 pt-2 border-t mt-1">

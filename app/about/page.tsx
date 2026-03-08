@@ -39,11 +39,11 @@ export default function AboutPage() {
           </div>
           <div className="flex justify-center">
             <Image
-              src="/nith1.webp"
+              src="/eduiaol_logo_transparent.png"
               alt="Eduiaol"
               width={400}
               height={300}
-              className="rounded-lg object-cover"
+              className="rounded-lg object-contain"
             />
           </div>
         </div>

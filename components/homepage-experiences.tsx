@@ -109,8 +109,6 @@ export default function HomepageExperiences() {
     }
     return typeMap[value] || value
   }
-// Ensure we have a profile picture and company logo
-const profilePicture = getRandomProfileImage()
 const CompanyLogo = getCompanyLogo()
   return (
     <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -120,7 +118,7 @@ const CompanyLogo = getCompanyLogo()
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
-                                    <AvatarImage src={profilePicture} alt={experience.studentName} />
+                                    <AvatarImage src={experience.profileImage || getRandomProfileImage()} alt={experience.studentName} />
                                     <AvatarFallback>{experience.studentName.substring(0, 2)}</AvatarFallback>
                                   </Avatar>
                 <div>

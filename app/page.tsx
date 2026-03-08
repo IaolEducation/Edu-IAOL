@@ -55,7 +55,7 @@ function GuestHome() {
               </div>
             </div>
             <div className="md:flex md:justify-center overflow-hidden">
-              <Image src="/haseenNITH.png" alt="Eduiaol – students and mentors" width={500} height={500} className="rounded-b-full object-cover w-[500px] h-[500px]" />
+              <Image src="/eduiaol_logo_transparent.png" alt="Eduiaol – students and mentors" width={500} height={500} className="rounded-b-full object-cover w-[500px] h-[500px]" />
             </div>
           </div>
         </div>

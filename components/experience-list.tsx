@@ -251,7 +251,6 @@ export default function ExperienceList() {
       </div>
     )
   }
-  const profilePicture = getRandomProfileImage()
   const CompanyLogo = getCompanyLogo()
 
   return (
@@ -272,7 +271,7 @@ export default function ExperienceList() {
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-2">
                     <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
-                      <AvatarImage src={profilePicture} alt={experience.studentName} />
+                      <AvatarImage src={experience.profileImage || getRandomProfileImage()} alt={experience.studentName} />
                       <AvatarFallback>{experience.studentName.substring(0, 2)}</AvatarFallback>
                     </Avatar>
                     <div>

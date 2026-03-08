@@ -17,7 +17,7 @@ import { AlertCircle, CheckCircle2, Search, User, Building, FileText, Link } fro
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { saveExperienceToFirestore } from "@/lib/firebase"
 import { getCompaniesFromFirestore } from "@/lib/firebase"
-import { uploadImageToStorage } from "@/lib/firebase" // Import the new function
+import { uploadFile } from "@/lib/upload"
 import { useAuth } from "@/contexts/auth-context"
 
 // Add this after other imports
@@ -216,11 +216,18 @@ export default function SubmissionForm() {
       linkedIn: "",
       github: "",
       personalEmail: "",
-      profilePictureUrl: "",
-      companyLogoUrl: "",
+      profilePicture: undefined,
+      companyLogo: undefined,
       termsAccepted: false,
     },
   })
+
+  // When user is logged in (e.g. Google), use their profile photo for the experience
+  useEffect(() => {
+    if (user?.photoURL) {
+      form.setValue("profilePicture", user.photoURL)
+    }
+  }, [user?.photoURL, form])
 
   // Add these functions inside the SubmissionForm component
   const addResource = () => {
@@ -246,9 +253,9 @@ export default function SubmissionForm() {
       // Create an excerpt from the preparation strategy
       const excerpt = values.preparationStrategy.substring(0, 200) + "..."
 
-      // Use the provided image URLs or default placeholders
-      const profileImageUrl = values.profilePictureUrl || "/placeholder.svg?height=100&width=100"
-      const companyLogoUrl = values.companyLogoUrl || "/placeholder.svg?height=40&width=40"
+      // Use the provided image URLs or default placeholders (profilePicture from schema; Google photo when logged in)
+      const profileImageUrl = values.profilePicture || "/placeholder.svg?height=100&width=100"
+      const companyLogoUrl = values.companyLogo || "/placeholder.svg?height=40&width=40"
 
       // Create a new experience object
       const newExperience = {
@@ -865,9 +872,9 @@ export default function SubmissionForm() {
     </Button>
   </div>
 
-  {form.watch("resources")?.length > 0 && (
+  {(form.watch("resources")?.length ?? 0) > 0 && (
     <div className="space-y-4">
-      {form.watch("resources").map((_, index) => (
+      {(form.watch("resources") ?? []).map((_, index) => (
         <div key={index} className="flex flex-col sm:flex-row gap-3 items-start">
           <div className="flex-1 space-y-2">
             <FormField
