@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/auth-context"
 import { Toaster } from "@/components/ui/toaster"
 import DataInitializer from "@/components/data-initializer"
 import PwaRegister from "@/components/pwa-register"
+import PwaInstallPrompt from "@/components/pwa-install-prompt"
 import { ChatProvider } from "@/providers/chat-provider"
 import { Chat } from "@/components/chat/chat"
 import { AppShell } from "@/components/app-shell"
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Chat />
             <AuthProvider>
               <PwaRegister />
+              <PwaInstallPrompt />
               <DataInitializer />
               <AppShell>{children}</AppShell>
               <Toaster />

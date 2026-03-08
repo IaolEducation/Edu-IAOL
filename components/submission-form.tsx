@@ -122,10 +122,6 @@ const formSchema = z.object({
     .string()
     .min(10, { message: "Phone number must be at least 10 digits." })
     .max(15, { message: "Phone number must not exceed 15 digits." }),
-  rollNumber: z
-    .string()
-    .min(5, { message: "Roll number must be at least 5 characters." })
-    .max(15, { message: "Roll number must not exceed 15 characters." }),
   branch: z.string({ required_error: "Please select your branch." }),
   graduationYear: z.string({ required_error: "Please select your graduation year." }),
   company: z.string().min(2, { message: "Company name must be at least 2 characters." }),
@@ -199,7 +195,6 @@ export default function SubmissionForm() {
       name: "",
       email: "",
       phoneNumber: "",
-      rollNumber: "",
       branch: "",
       graduationYear: "",
       company: "",
@@ -272,7 +267,6 @@ export default function SubmissionForm() {
         status: "approved" as const,
         email: values.email,
         phoneNumber: values.phoneNumber,
-        rollNumber: values.rollNumber,
         role: values.role,
         graduationYear: values.graduationYear,
         package: values.package || "Not disclosed",
@@ -344,7 +338,7 @@ export default function SubmissionForm() {
   const handleTabChange = (value: string) => {
     // Validate current tab before allowing change
     if (value === "placement" && activeTab === "personal") {
-      const personalFields = ["name", "email","phoneNumber", "rollNumber", "branch", "graduationYear"]
+      const personalFields = ["name", "email", "phoneNumber", "branch", "graduationYear"]
       const isValid = personalFields.every((field) => {
         return form.getFieldState(field as any).invalid !== true
       })
@@ -373,7 +367,7 @@ export default function SubmissionForm() {
   const goToNextTab = async () => {
     if (activeTab === "personal") {
       // Validate personal fields before proceeding
-      const personalFields = ["name", "email","phoneNumber", "rollNumber", "branch", "graduationYear"]
+      const personalFields = ["name", "email", "phoneNumber", "branch", "graduationYear"]
       const isValid = await form.trigger(personalFields as any)
 
       if (isValid) {
@@ -568,20 +562,6 @@ export default function SubmissionForm() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="rollNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Roll Number</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Roll number (optional)" {...field} />
-                        </FormControl>
-                        <FormDescription>Will only be visible to admins</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">

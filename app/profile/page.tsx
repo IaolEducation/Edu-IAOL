@@ -71,6 +71,7 @@ interface Experience { id: any; studentName: string; branch: string; company: st
 interface SavedItem { id: string; itemId: string; itemType: "advice" | "experience"; title: string; savedAt: any; meta?: string }
 interface UpdatePost { id: string; title: string; content: string; category: string; authorName: string; createdAt: any }
 interface SharedResource { id: string; title: string; description?: string; url?: string; fileUrl?: string; fileType?: "image" | "pdf" | "doc" | "other"; fileName?: string; type: "link" | "file"; category: string; createdAt: Timestamp | null }
+interface CollegeActivity { id: string; title: string; activityType: "project" | "club" | "internship" | "hackathon" | "achievement" | "research" | "other"; description: string; skills: string; year: string; link?: string; createdAt: any }
 
 function getInitials(name: string | null | undefined, email: string | null | undefined): string {
   if (name?.trim()) return name.trim().split(" ").filter(Boolean).slice(0, 2).map((n) => n[0].toUpperCase()).join("")
@@ -164,6 +165,18 @@ function ProfileContent() {
 
   const canUploadAdvice = true // All users (student, college_student, professional) can post advice
 
+  // College Activities (college_student type only)
+  const [myActivities, setMyActivities] = useState<CollegeActivity[]>([])
+  const [loadingActivities, setLoadingActivities] = useState(false)
+  const [showActivityForm, setShowActivityForm] = useState(false)
+  const [activityTitle, setActivityTitle] = useState("")
+  const [activityType, setActivityType] = useState<CollegeActivity["activityType"]>("project")
+  const [activityDescription, setActivityDescription] = useState("")
+  const [activitySkills, setActivitySkills] = useState("")
+  const [activityYear, setActivityYear] = useState(new Date().getFullYear().toString())
+  const [activityLink, setActivityLink] = useState("")
+  const [addingActivity, setAddingActivity] = useState(false)
+
   // Load shared resources
   useEffect(() => {
     if (!user) return
@@ -174,6 +187,18 @@ function ProfileContent() {
       })
       .catch(() => {/* silent */})
       .finally(() => setLoadingSharedResources(false))
+  }, [user])
+
+  // Load college activities (only for college_student)
+  useEffect(() => {
+    if (!user || user.userType !== "college_student") return
+    setLoadingActivities(true)
+    getDocs(query(collection(db, "college_activities"), where("uid", "==", user.uid), orderBy("createdAt", "desc")))
+      .then((snap) => {
+        setMyActivities(snap.docs.map((d) => ({ id: d.id, ...d.data() } as CollegeActivity)))
+      })
+      .catch(() => {})
+      .finally(() => setLoadingActivities(false))
   }, [user])
 
   // Load all data
@@ -371,6 +396,39 @@ function ProfileContent() {
       await deleteDoc(doc(db, "saves", saveId))
       setSavedItems((prev) => prev.filter((s) => s.id !== saveId))
     } catch { /* silent */ }
+  }
+
+  const handleAddActivity = async () => {
+    if (!activityTitle.trim() || !activityDescription.trim() || !user) {
+      toast({ title: "Missing fields", description: "Please fill title and description.", variant: "destructive" })
+      return
+    }
+    setAddingActivity(true)
+    try {
+      const docRef = await addDoc(collection(db, "college_activities"), {
+        uid: user.uid,
+        title: activityTitle.trim(),
+        activityType,
+        description: activityDescription.trim(),
+        skills: activitySkills.trim(),
+        year: activityYear,
+        link: activityLink.trim(),
+        createdAt: serverTimestamp(),
+      })
+      setMyActivities((prev) => [{ id: docRef.id, title: activityTitle.trim(), activityType, description: activityDescription.trim(), skills: activitySkills.trim(), year: activityYear, link: activityLink.trim(), createdAt: null }, ...prev])
+      toast({ title: "Activity added!" })
+      setActivityTitle(""); setActivityType("project"); setActivityDescription(""); setActivitySkills(""); setActivityYear(new Date().getFullYear().toString()); setActivityLink("")
+      setShowActivityForm(false)
+    } catch { toast({ title: "Error", description: "Could not add activity.", variant: "destructive" }) }
+    finally { setAddingActivity(false) }
+  }
+
+  const handleDeleteActivity = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, "college_activities", id))
+      setMyActivities((prev) => prev.filter((a) => a.id !== id))
+      toast({ title: "Activity removed" })
+    } catch { toast({ title: "Error", description: "Could not delete activity.", variant: "destructive" }) }
   }
 
   const handlePostUpdate = async () => {
@@ -590,7 +648,12 @@ function ProfileContent() {
               <span className="text-xs"><span className="font-bold">{followerCount || 0}</span> <span className="text-muted-foreground">followers</span></span>
               <span className="text-xs"><span className="font-bold">{followingCount || 0}</span> <span className="text-muted-foreground">following</span></span>
               <span className="text-xs"><span className="font-bold">{myAdvice.length || 0}</span> <span className="text-muted-foreground">advice</span></span>
-              <span className="text-xs"><span className="font-bold">{myExperiences.length || 0}</span> <span className="text-muted-foreground">experiences</span></span>
+              {user.userType === "professional" && (
+                <span className="text-xs"><span className="font-bold">{myExperiences.length || 0}</span> <span className="text-muted-foreground">experiences</span></span>
+              )}
+              {user.userType === "college_student" && (
+                <span className="text-xs"><span className="font-bold">{myActivities.length || 0}</span> <span className="text-muted-foreground">activities</span></span>
+              )}
             </div>
           </div>
         </CardContent>
@@ -638,14 +701,19 @@ function ProfileContent() {
 
       {/* ── Action Buttons ── */}
       <div className="flex flex-wrap gap-3">
-        {canUploadAdvice && (
-          <Button onClick={() => setShowAdviceForm(true)} className="gap-2">
-            <Lightbulb className="h-4 w-4" /> Share Advice
+        <Button onClick={() => setShowAdviceForm(true)} className="gap-2">
+          <Lightbulb className="h-4 w-4" /> Share Advice
+        </Button>
+        {user.userType === "professional" && (
+          <Button asChild variant="outline" className="gap-2">
+            <Link href="/submit"><Upload className="h-4 w-4" /> Share Experience</Link>
           </Button>
         )}
-        <Button asChild variant="outline" className="gap-2">
-          <Link href="/submit"><Upload className="h-4 w-4" /> Submit Experience</Link>
-        </Button>
+        {user.userType === "college_student" && (
+          <Button onClick={() => setShowActivityForm(true)} variant="outline" className="gap-2">
+            <Plus className="h-4 w-4" /> Add College Activity
+          </Button>
+        )}
         <Button asChild variant="outline" className="gap-2">
           <Link href="/messages"><MessageCircle className="h-4 w-4" /> Messages</Link>
         </Button>
@@ -844,40 +912,95 @@ function ProfileContent() {
             </div>
           )}
         </div>
-        {/* Experiences in All view */}
-        <div>
-          <h3 className="text-sm font-medium mb-3 flex items-center gap-2"><Building className="h-4 w-4" /> Experiences</h3>
-          {loadingExp && <div className="flex justify-center py-6"><div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>}
-          {!loadingExp && myExperiences.length === 0 && (
-            <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-              <Building className="h-8 w-8 mx-auto mb-2 opacity-30" /> No experiences yet. <Link href="/submit" className="text-primary hover:underline">Submit one</Link>.
-            </div>
-          )}
-          {!loadingExp && myExperiences.length > 0 && (
-            <div className="space-y-3">
-              {myExperiences.map((exp) => (
-                <Link key={exp.id} href={`/experiences/${String(exp.id)}`} className="block rounded-lg border p-4 hover:bg-muted/50 hover:border-primary/30 transition-all group">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div>
-                      <h3 className="font-medium text-sm group-hover:text-primary transition-colors">{exp.company}</h3>
-                      {exp.role && <p className="text-xs text-muted-foreground">{exp.role}</p>}
+        {/* Placement Experiences (professionals only) */}
+        {user.userType === "professional" && (
+          <div>
+            <h3 className="text-sm font-medium mb-3 flex items-center gap-2"><Briefcase className="h-4 w-4" /> Placement Experiences</h3>
+            {loadingExp && <div className="flex justify-center py-6"><div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>}
+            {!loadingExp && myExperiences.length === 0 && (
+              <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+                <Briefcase className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                <p className="mb-2">No placement experiences shared yet.</p>
+                <Button asChild size="sm" variant="outline" className="text-xs gap-1">
+                  <Link href="/submit"><Upload className="h-3.5 w-3.5" /> Share your experience</Link>
+                </Button>
+              </div>
+            )}
+            {!loadingExp && myExperiences.length > 0 && (
+              <div className="space-y-3">
+                {myExperiences.map((exp) => (
+                  <Link key={exp.id} href={`/experiences/${String(exp.id)}`} className="block rounded-lg border p-4 hover:bg-muted/50 hover:border-primary/30 transition-all group">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div>
+                        <h3 className="font-medium text-sm group-hover:text-primary transition-colors">{exp.company}</h3>
+                        {exp.role && <p className="text-xs text-muted-foreground">{exp.role}</p>}
+                      </div>
+                      <div className="flex gap-1.5 flex-wrap justify-end">
+                        <Badge variant="outline" className="text-xs">{exp.type}</Badge>
+                        <Badge variant="secondary" className="text-xs">{String(exp.year || "")}</Badge>
+                      </div>
                     </div>
-                    <div className="flex gap-1.5 flex-wrap justify-end">
-                      <Badge variant="outline" className="text-xs">{exp.type}</Badge>
-                      <Badge variant="secondary" className="text-xs">{String(exp.year || "")}</Badge>
+                    <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{exp.excerpt}</p>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      {exp.branch && <span className="flex items-center gap-1"><GraduationCap className="h-3 w-3" />{exp.branch}</span>}
+                      {exp.package && <span className="flex items-center gap-1"><Award className="h-3 w-3" />{exp.package}</span>}
                     </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{exp.excerpt}</p>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    {exp.branch && <span className="flex items-center gap-1"><GraduationCap className="h-3 w-3" />{exp.branch}</span>}
-                    {exp.package && <span className="flex items-center gap-1"><Award className="h-3 w-3" />{exp.package}</span>}
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* College Activities (college_student only) */}
+        {user.userType === "college_student" && (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium flex items-center gap-2"><GraduationCap className="h-4 w-4" /> College Activities</h3>
+              <Button size="sm" variant="ghost" className="h-7 text-xs gap-1" onClick={() => setShowActivityForm(true)}>
+                <Plus className="h-3.5 w-3.5" /> Add
+              </Button>
             </div>
-          )}
-        </div>
-        </>
+            {loadingActivities && <div className="flex justify-center py-6"><div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>}
+            {!loadingActivities && myActivities.length === 0 && (
+              <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+                <GraduationCap className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                <p className="mb-2">Add projects, clubs, internships, hackathons & more.</p>
+                <Button size="sm" variant="outline" className="text-xs gap-1" onClick={() => setShowActivityForm(true)}>
+                  <Plus className="h-3.5 w-3.5" /> Add your first activity
+                </Button>
+              </div>
+            )}
+            {!loadingActivities && myActivities.length > 0 && (
+              <div className="space-y-3">
+                {myActivities.map((act) => (
+                  <div key={act.id} className="rounded-lg border p-4 hover:bg-muted/30 transition-colors">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-sm">{act.title}</h3>
+                        {act.skills && <p className="text-xs text-muted-foreground mt-0.5">{act.skills}</p>}
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <Badge variant="outline" className="text-xs capitalize">{act.activityType}</Badge>
+                        <Badge variant="secondary" className="text-xs">{act.year}</Badge>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => handleDeleteActivity(act.id)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground line-clamp-2">{act.description}</p>
+                    {act.link && (
+                      <a href={act.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1.5">
+                        <ExternalLink className="h-3 w-3" /> View project
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+</>
         )}
 
         {profileViewMode === "archived" && (
@@ -1005,6 +1128,60 @@ function ProfileContent() {
           </CardContent>
         </Card>
       )}
+
+      {/* ── Add College Activity Dialog ── */}
+      <Dialog open={showActivityForm} onOpenChange={setShowActivityForm}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><GraduationCap className="h-5 w-5 text-primary" /> Add College Activity</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-1.5">
+              <Label>Activity Type *</Label>
+              <Select value={activityType} onValueChange={(v) => setActivityType(v as CollegeActivity["activityType"])}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="project">Project</SelectItem>
+                  <SelectItem value="internship">Internship (during college)</SelectItem>
+                  <SelectItem value="club">Club / Society</SelectItem>
+                  <SelectItem value="hackathon">Hackathon</SelectItem>
+                  <SelectItem value="achievement">Achievement / Award</SelectItem>
+                  <SelectItem value="research">Research</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Title *</Label>
+              <Input placeholder="e.g. Final Year Project on AI, GSoC 2024, IEEE Member" value={activityTitle} onChange={(e) => setActivityTitle(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Description *</Label>
+              <Textarea placeholder="Describe what you did, your role, and what you learned…" rows={4} value={activityDescription} onChange={(e) => setActivityDescription(e.target.value)} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Skills / Technologies</Label>
+                <Input placeholder="e.g. React, Python, Leadership" value={activitySkills} onChange={(e) => setActivitySkills(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Year</Label>
+                <Input type="number" min="2000" max={new Date().getFullYear() + 1} value={activityYear} onChange={(e) => setActivityYear(e.target.value)} />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Link (Optional)</Label>
+              <Input placeholder="GitHub, project URL, certificate link…" value={activityLink} onChange={(e) => setActivityLink(e.target.value)} />
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => setShowActivityForm(false)} className="flex-1">Cancel</Button>
+              <Button onClick={handleAddActivity} disabled={addingActivity || !activityTitle.trim() || !activityDescription.trim()} className="flex-1">
+                {addingActivity ? "Adding…" : "Add Activity"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit Advice Dialog */}
       <Dialog open={!!editingPost} onOpenChange={(o) => !o && setEditingPost(null)}>

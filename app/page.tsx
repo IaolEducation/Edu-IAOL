@@ -54,8 +54,8 @@ function GuestHome() {
                 </Button>
               </div>
             </div>
-            <div className="md:flex md:justify-center overflow-hidden">
-              <Image src="/eduiaol_logo_transparent.png" alt="Eduiaol – students and mentors" width={500} height={500} className="rounded-b-full object-cover w-[500px] h-[500px]" />
+            <div className="flex justify-center overflow-hidden">
+              <Image src="/eduiaol_logo_transparent.png" alt="Eduiaol – students and mentors" width={400} height={400} className="rounded-b-full object-cover w-[220px] h-[220px] sm:w-[300px] sm:h-[300px] md:w-[380px] md:h-[380px]" />
             </div>
           </div>
         </div>
