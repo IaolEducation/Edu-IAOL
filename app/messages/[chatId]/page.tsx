@@ -512,7 +512,7 @@ function ChatContent() {
                 onClick={handleSend}
                 disabled={sending || uploading || (!text.trim() && !previewFile)}
                 size="icon"
-                className="h-9 w-9 shrink-0 text-primary hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20 disabled:text-muted-foreground disabled:opacity-50"
+                className="h-9 w-9 shrink-0 bg-transparent text-foreground hover:text-foreground hover:bg-accent disabled:text-muted-foreground disabled:opacity-50"
               >
                 {(sending || uploading) ? (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />

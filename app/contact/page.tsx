@@ -7,7 +7,7 @@ import RequireLogin from "@/components/require-login"
 
 export const metadata: Metadata = {
   title: "Contact | Eduiaol",
-  description: "Contact Eduiaol – iaoleducation65@gmail.com · Kargil, Ladakh",
+  description: "Contact IAOL Education – iaoleducation65@gmail.com · Kargil, Ladakh",
 }
 
 export default function ContactPage() {
@@ -18,7 +18,7 @@ export default function ContactPage() {
         <div className="space-y-4">
           <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Contact Us</h1>
           <p className="text-muted-foreground">
-            Get in touch with Eduiaol for any queries or assistance
+            Get in touch with IAOL Education for any queries or assistance
           </p>
         </div>
 
@@ -26,8 +26,8 @@ export default function ContactPage() {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Eduiaol</CardTitle>
-                <CardDescription>Affiliated with IAOL Education · Kargil, Ladakh</CardDescription>
+                <CardTitle>IAOL Education</CardTitle>
+                <CardDescription>Counselling thousands of JEE, NEET & other stream students · Kargil, Ladakh</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
@@ -35,9 +35,9 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-medium">Address</h3>
                     <p className="text-sm text-muted-foreground">
-                      Eduiaol
+                      IAOL Education
                       <br />
-                      Affiliated with IAOL Education · Kargil, Ladakh
+                      Kargil, Ladakh
                       <br />
                       India
                     </p>
@@ -49,7 +49,6 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-medium">Phone</h3>
                     <p className="text-sm text-muted-foreground">Contact via email</p>
-                  
                   </div>
                 </div>
 
@@ -57,8 +56,7 @@ export default function ContactPage() {
                   <Mail className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
                   <div>
                     <h3 className="font-medium">Email</h3>
-                    
-                    <p className="text-sm text-muted-foreground">contact@iaol.education</p>
+                    <p className="text-sm text-muted-foreground">iaoleducation65@gmail.com</p>
                   </div>
                 </div>
 
@@ -82,8 +80,8 @@ export default function ContactPage() {
               <CardContent className="space-y-4">
                 <div>
                   <h3 className="font-medium">Support</h3>
-                  <p className="text-sm text-muted-foreground">Eduiaol Team</p>
-                  <p className="text-sm text-muted-foreground">Email: contact@iaol.education</p>
+                  <p className="text-sm text-muted-foreground">IAOL Education Team</p>
+                  <p className="text-sm text-muted-foreground">Email: iaoleducation65@gmail.com</p>
                 </div>
 
                
@@ -98,18 +96,13 @@ export default function ContactPage() {
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-4">
                   <Button variant="outline" size="sm" className="flex items-center gap-2" asChild>
-                    <a href="https://www.linkedin.com/school/nit-hamirpur/" target="_blank" rel="noopener noreferrer">
+                    <a href="https://www.linkedin.com/company/iaol-ladakh" target="_blank" rel="noopener noreferrer">
                       LinkedIn <ExternalLink className="h-3 w-3" />
                     </a>
                   </Button>
                   <Button variant="outline" size="sm" className="flex items-center gap-2" asChild>
-                    <a href="https://twitter.com/NITHamirpur" target="_blank" rel="noopener noreferrer">
+                    <a href="https://x.com/IAOL_Educatiom" target="_blank" rel="noopener noreferrer">
                       Twitter <ExternalLink className="h-3 w-3" />
-                    </a>
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex items-center gap-2" asChild>
-                    <a href="https://www.facebook.com/NITHamirpur" target="_blank" rel="noopener noreferrer">
-                      Facebook <ExternalLink className="h-3 w-3" />
                     </a>
                   </Button>
                 </div>
@@ -136,18 +129,13 @@ export default function ContactPage() {
               <CardContent>
                 <div className="flex flex-wrap items-center gap-4">
                   <Button variant="outline" size="sm" className="flex items-center gap-2" asChild>
-                    <a href="https://www.linkedin.com/school/nit-hamirpur/" target="_blank" rel="noopener noreferrer">
+                    <a href="https://www.linkedin.com/company/iaol-ladakh" target="_blank" rel="noopener noreferrer">
                       LinkedIn <ExternalLink className="h-3 w-3" />
                     </a>
                   </Button>
                   <Button variant="outline" size="sm" className="flex items-center gap-2" asChild>
-                    <a href="https://twitter.com/NITHamirpur" target="_blank" rel="noopener noreferrer">
+                    <a href="https://x.com/IAOL_Educatiom" target="_blank" rel="noopener noreferrer">
                       Twitter <ExternalLink className="h-3 w-3" />
-                    </a>
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex items-center gap-2" asChild>
-                    <a href="https://www.facebook.com/NITHamirpur" target="_blank" rel="noopener noreferrer">
-                      Facebook <ExternalLink className="h-3 w-3" />
                     </a>
                   </Button>
                 </div>
@@ -156,7 +144,7 @@ export default function ContactPage() {
 
             <div className="mt-8 rounded-lg overflow-hidden h-[300px] border">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3382.6349275374!2d76.52488491511874!3d31.708420981307237!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3904d5487e12c4a1%3A0x395f92d3a202a7d0!2sNational%20Institute%20of%20Technology%2C%20Hamirpur!5e0!3m2!1sen!2sin!4v1648123456789!5m2!1sen!2sin"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13282.747906519483!2d76.11399!3d34.55918!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38fde18e08aaaaab%3A0x9e0e3f1f87b84a73!2sKargil%2C%20Ladakh!5e0!3m2!1sen!2sin!4v1710000000000!5m2!1sen!2sin"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
@@ -172,29 +160,27 @@ export default function ContactPage() {
           <h2 className="text-xl sm:text-2xl font-bold mb-4 text-center">Frequently Asked Questions</h2>
           <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
             <div>
-              <h3 className="font-semibold mb-2">How can companies register for campus placements?</h3>
+              <h3 className="font-semibold mb-2">How can I enroll in IAOL Education counselling?</h3>
               <p className="text-sm text-muted-foreground">
-                For partnership or recruitment queries, email us at contact@iaol.education. Our team will get back to you.
+                You can reach out to us at iaoleducation65@gmail.com or use the contact form above. Our team will guide you through the enrolment process.
               </p>
             </div>
             <div>
-              <h3 className="font-semibold mb-2">When does the placement season begin?</h3>
+              <h3 className="font-semibold mb-2">Which exams does IAOL Education cover?</h3>
               <p className="text-sm text-muted-foreground">
-                Our placement season typically begins in August for final year students. Pre-placement talks and
-                activities start in July. Internship drives for pre-final year students usually begin in January.
+                We counsel students preparing for JEE, NEET, and other competitive entrance exams across various streams.
               </p>
             </div>
             <div>
-              <h3 className="font-semibold mb-2">How can alumni contribute to the placement portal?</h3>
+              <h3 className="font-semibold mb-2">Where is IAOL Education located?</h3>
               <p className="text-sm text-muted-foreground">
-                Alumni can contribute by sharing their placement experiences through our submission form. They can also
-                volunteer for mentorship programs and mock interviews by contacting us.
+                IAOL Education is based in Kargil, Ladakh, India, and has been counselling thousands of students from the region and beyond.
               </p>
             </div>
             <div>
-              <h3 className="font-semibold mb-2">Is there a placement brochure available?</h3>
+              <h3 className="font-semibold mb-2">Are study resources available on the platform?</h3>
               <p className="text-sm text-muted-foreground">
-                Resources and brochures are available in the Resources section once you are signed in.
+                Yes, resources and study materials are available in the Resources section once you are signed in.
               </p>
             </div>
           </div>
