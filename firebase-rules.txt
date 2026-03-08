@@ -1,0 +1,108 @@
+// Deploy in Firebase Console: Firestore Database → Rules → paste below → Publish
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper: hardcoded admin emails (same as app). These users always have admin access in rules.
+    function isHardcodedAdmin() {
+      return request.auth != null &&
+        request.auth.token.email != null &&
+        (request.auth.token.email == 'talibhassan1122@gmail.com' ||
+         request.auth.token.email == 'iaoleducation65@gmail.com');
+    }
+    // Helper: admin via users/{uid}.role == 'admin'
+    function isAdminViaRole() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    function isAdmin() {
+      return isHardcodedAdmin() || isAdminViaRole();
+    }
+
+    // Admins collection: user can read their own doc (so auth context can check isUserInAdminsCollection)
+    match /admins/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if isAdmin();
+    }
+
+    // Allow anyone to read approved experiences
+    match /experiences/{experienceId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if request.auth != null && (
+        resource.data.uid == request.auth.uid || isAdmin()
+      );
+    }
+
+    // Allow anyone to read companies
+    match /companies/{companyId} {
+      allow read: if true;
+      allow write: if request.auth != null && isAdmin();
+    }
+
+    // User profiles:
+    //   - Anyone can read profiles (needed for Community page guest view)
+    //   - Users can write only their own profile
+    //   - Admins can read/write any profile
+    //   - Users can delete their own profile (needed for deleteAccount)
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && isAdmin();
+    }
+
+    // Advice collection: any authenticated user can create; authors can update/delete
+    match /advice/{adviceId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && (
+        resource.data.authorId == request.auth.uid || isAdmin()
+      );
+    }
+
+    // Student shares (notes, resources, references)
+    match /shares/{shareId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && (
+        resource.data.authorId == request.auth.uid || isAdmin()
+      );
+    }
+
+    // Updates (exam updates, education tech, etc.) – anyone can post and read
+    match /updates/{updateId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && (
+        resource.data.authorId == request.auth.uid || isAdmin()
+      );
+    }
+
+    // Follows collection:
+    //   - Authenticated users can read follows (needed for community page queries)
+    //   - Users can only create follows where they are the follower
+    //   - Users can only delete their own follows
+    match /follows/{followId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.followerId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.followerId == request.auth.uid;
+    }
+
+    // Saves collection: users can read/write their own saves only
+    match /saves/{saveId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Stats document for admin counts
+    match /stats/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null && (
+        isAdmin() ||
+        (docId == 'admin' && !exists(/databases/$(database)/documents/stats/admin))
+      );
+    }
+  }
+}

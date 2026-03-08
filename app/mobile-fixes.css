@@ -1,0 +1,92 @@
+/* Mobile fixes for content overflow */
+@media (max-width: 640px) {
+  /* Prevent horizontal overflow */
+  body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* Ensure all images are responsive */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Ensure text doesn't overflow containers */
+  .truncate-mobile {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Ensure cards don't overflow */
+  .card {
+    max-width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Ensure badges wrap properly */
+  .badge-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  /* Ensure filter buttons don't overflow */
+  .filter-buttons {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  /* Ensure text in badges doesn't overflow */
+  .badge {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  /* Ensure proper spacing in experience cards */
+  .experience-card-content {
+    padding: 0.5rem;
+  }
+
+  /* Ensure proper font sizes */
+  .mobile-text-xs {
+    font-size: 0.75rem;
+  }
+
+  /* Fix for filter dropdown positioning */
+  .filter-dropdown {
+    position: static;
+  }
+}
+
+/* Enhanced blur effect for header and footer */
+header,
+footer {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+/* Ensure text is readable on transparent backgrounds */
+.nith-theme header a,
+.nith-theme header button,
+.nith-theme footer a {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Ensure badges wrap properly on all screen sizes */
+.badge-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+/* Ensure images in cards are properly sized */
+.card-image {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+

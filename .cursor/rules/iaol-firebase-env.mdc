@@ -1,0 +1,50 @@
+---
+description: IAOLEducation Firebase and environment configuration. Follow this so auth, Firestore, and env work correctly.
+globs: 
+  - "lib/firebase.ts"
+  - ".env*"
+  - "docs/**"
+  - "contexts/auth-context.tsx"
+  - "app/auth/**"
+---
+
+# IAOLEducation – Firebase & Environment Rules
+
+## Environment variables (never in code)
+
+- All Firebase config MUST come from environment variables. Never hardcode API keys or secrets in source.
+- File: `.env.local` (create from `.env.example`). Never commit `.env.local` (it is gitignored).
+- Required for Firebase:
+  - `NEXT_PUBLIC_FIREBASE_API_KEY`
+  - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+  - `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+  - `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+  - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+  - `NEXT_PUBLIC_FIREBASE_APP_ID`
+- Optional: `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID` (analytics). Not used in `lib/firebase.ts` by default.
+- Only variables prefixed with `NEXT_PUBLIC_` are available in the browser.
+
+## Firebase usage in this project
+
+- **Config:** `lib/firebase.ts` reads `process.env.NEXT_PUBLIC_FIREBASE_*` and calls `initializeApp(firebaseConfig)`. Do not add a second `initializeApp` or override config in other files.
+- **Auth:** Firebase Auth is used for sign-in (Google primary; Email/Password optional). Auth state is synced in `contexts/auth-context.tsx` and with Firestore `users` and `admins` collections.
+- **Firestore:** Used for `users`, `admins`, `experiences`, `companies`. All client-side access goes through `lib/firebase.ts` (e.g. `db`, `getDoc`, `setDoc`) or `lib/data-utils.ts`.
+- **Storage:** Used for file uploads (e.g. images). Initialized in `lib/firebase.ts` as `storage`.
+- **Analytics:** The Firebase snippet shows `getAnalytics(app)`. This project does not initialize Analytics in `lib/firebase.ts` to avoid SSR issues. If adding analytics, use a client-only check (e.g. `typeof window !== "undefined"`).
+
+## Adding or changing Firebase features
+
+1. Install SDK: `npm install firebase` (already in package.json).
+2. Import only what you need in `lib/firebase.ts` (e.g. from `firebase/auth`, `firebase/firestore`, `firebase/storage`).
+3. Keep config in one place: the `firebaseConfig` object in `lib/firebase.ts` built from env vars.
+4. Document any new env vars in `.env.example` and in `docs/SETUP.md` or `docs/FIREBASE_GOOGLE_SETUP.md`.
+
+## Auth flows
+
+- **Google:** Enable in Firebase Console → Authentication → Sign-in method → Google. No extra env vars.
+- **Email/Password:** Optional. Enable in Firebase Console if you want "Sign in with email instead" to work.
+- **Admin:** User is admin if `users/{uid}.role === "admin"` OR a document exists in `admins` with document ID = uid. Admin link in header when `isAdmin` is true.
+
+## After changing .env.local
+
+- Restart the dev server (`npm run dev`). Next.js reads env at build/start time.

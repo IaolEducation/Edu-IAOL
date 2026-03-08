@@ -1,0 +1,446 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+
+  /* Updated NITH theme with the specific colors provided */
+  .nith-theme {
+    /* Primary: #660000 (dark maroon) */
+    --primary: 0 100% 20%;
+    --primary-foreground: 48 100% 96%;
+
+    /* Secondary: #A52A2A (brown/rust) */
+    --secondary: 0 59% 40%;
+    --secondary-foreground: 48 100% 96%;
+
+    /* Background: #FCF1B1 (light yellow) */
+    --background: 52 89% 84%;
+    --foreground: 0 100% 20%;
+
+    /* Card with subtle background: #FAF0B3 */
+    --card: 51 83% 84%;
+    --card-foreground: 0 100% 20%;
+
+    /* Popover */
+    --popover: 51 83% 84%;
+    --popover-foreground: 0 100% 20%;
+
+    /* Muted: slightly darker than background */
+    --muted: 51 70% 80%;
+    --muted-foreground: 0 59% 30%;
+
+    /* Accent: using the tertiary color #990000 */
+    --accent: 0 100% 30%;
+    --accent-foreground: 48 100% 96%;
+
+    /* Destructive */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 48 100% 96%;
+
+    /* Border: slightly darker than background */
+    --border: 51 60% 75%;
+    --input: 51 60% 75%;
+
+    /* Ring: using primary color */
+    --ring: 0 100% 20%;
+
+    /* Gold tertiary color: #FFD700 */
+    --gold: 51 100% 50%;
+
+    /* Additional tertiary color: #990000 */
+    --tertiary-red: 0 100% 30%;
+
+    /* Header specific colors */
+    --header-background: 0 100% 20%;
+    --header-foreground: 51 83% 84%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Update the header styling for NITH theme with the new colors */
+.nith-theme header {
+  background-color: #660000; /* Primary color for header background */
+  border-bottom-color: #990000; /* Slightly darker for border */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Update header text and icon colors for NITH theme */
+.nith-theme header * {
+  color: #faf0b3; /* Light yellow for text and icons */
+}
+
+/* Ensure buttons in header maintain their styling */
+.nith-theme header button,
+.nith-theme header .btn {
+  color: #faf0b3; /* Light yellow for text */
+}
+
+/* Ensure links in header have proper hover states */
+.nith-theme header a:hover,
+.nith-theme header button:hover {
+  color: #fcf1b1; /* Slightly brighter on hover */
+}
+
+/* Ensure the logo in header is visible */
+.nith-theme header .logo {
+  filter: brightness(1.2); /* Make logo slightly brighter if needed */
+}
+
+/* Ensure dropdown menus in header have proper styling */
+.nith-theme header [role="menu"],
+.nith-theme header .dropdown-content {
+  background-color: #660000; /* Match header background */
+  border-color: #990000; /* Slightly darker for border */
+}
+
+.nith-theme header [role="menu"] *,
+.nith-theme header .dropdown-content * {
+  color: #faf0b3; /* Light yellow for text */
+}
+
+.nith-theme header [role="menu"] *:hover,
+.nith-theme header .dropdown-content *:hover {
+  background-color: #990000; /* Slightly darker for hover */
+  color: #fcf1b1; /* Slightly brighter text on hover */
+}
+
+/* Theme toggle button styling for NITH theme - UPDATED with lighter border */
+.nith-theme header .theme-toggle,
+.nith-theme header .mode-toggle {
+  background-color: #660000 !important; /* Match header background */
+  color: #faf0b3 !important; /* Light yellow for icon */
+  border: 2px solid #faf0b3 !important; /* Lighter border with increased thickness */
+  border-radius: 0.375rem !important; /* Ensure border radius is maintained */
+}
+
+.nith-theme header .theme-toggle:hover,
+.nith-theme header .mode-toggle:hover {
+  background-color: #990000 !important; /* Slightly darker for hover */
+  border-color: #fcf1b1 !important; /* Slightly brighter border on hover */
+}
+
+/* Target any button with theme or mode in the class name */
+.nith-theme header button[class*="theme"],
+.nith-theme header button[class*="mode"] {
+  background-color: #660000 !important; /* Match header background */
+  color: #faf0b3 !important; /* Light yellow for icon */
+  border: 2px solid #faf0b3 !important; /* Lighter border with increased thickness */
+}
+
+.nith-theme header button[class*="theme"]:hover,
+.nith-theme header button[class*="mode"]:hover {
+  background-color: #990000 !important; /* Slightly darker for hover */
+  border-color: #fcf1b1 !important; /* Slightly brighter border on hover */
+}
+
+/* Target the ModeToggle component specifically */
+.nith-theme header .ModeToggle button,
+.nith-theme header [id*="radix-"][role="menu"] {
+  background-color: #660000 !important; /* Match header background */
+  border: 2px solid #faf0b3 !important; /* Lighter border with increased thickness */
+}
+
+.nith-theme header .ModeToggle [data-state="open"] {
+  background-color: #990000 !important; /* Slightly darker when open */
+}
+
+/* Target any dropdown content from the theme toggle */
+.nith-theme [id*="radix-"][role="menu"] {
+  background-color: #660000 !important; /* Match header background */
+  border: 2px solid #faf0b3 !important; /* Lighter border with increased thickness */
+}
+
+.nith-theme [id*="radix-"][role="menu"] * {
+  color: #faf0b3 !important; /* Light yellow for text */
+}
+
+.nith-theme [id*="radix-"][role="menu"] *:hover {
+  background-color: #990000 !important; /* Slightly darker for hover */
+}
+
+.prose h2 {
+  @apply text-xl font-semibold mt-6 mb-3;
+}
+
+.prose h3 {
+  @apply text-lg font-medium mt-4 mb-2;
+}
+
+.prose p {
+  @apply my-3;
+}
+
+.prose ul,
+.prose ol {
+  @apply my-3 ml-6;
+}
+
+.prose ul {
+  @apply list-disc;
+}
+
+.prose ol {
+  @apply list-decimal;
+}
+
+.prose li {
+  @apply my-1;
+}
+
+.prose strong {
+  @apply font-semibold;
+}
+
+/* Official badge styling */
+.official-badge {
+  background-color: rgba(var(--gold), 0.2);
+  border-color: hsl(var(--gold));
+  color: hsl(var(--gold));
+}
+
+.dark .official-badge {
+  background-color: rgba(var(--primary), 0.2);
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
+}
+
+.nith-theme .official-badge {
+  background-color: rgba(255, 215, 0, 0.2); /* #FFD700 with opacity */
+  border-color: #ffd700;
+  color: #660000;
+}
+
+/* Custom styling for input elements in nith-theme */
+.nith-theme input:not([type="checkbox"]):not([type="radio"]),
+.nith-theme textarea,
+.nith-theme select,
+.nith-theme .select-trigger,
+.nith-theme .input {
+  border-color: #a52a2a; /* Secondary color */
+  transition: border-color 0.2s ease-in-out;
+}
+
+.nith-theme input:not([type="checkbox"]):not([type="radio"]):hover,
+.nith-theme textarea:hover,
+.nith-theme select:hover,
+.nith-theme .select-trigger:hover,
+.nith-theme .input:hover {
+  border-color: #990000; /* Tertiary red */
+}
+
+.nith-theme input:not([type="checkbox"]):not([type="radio"]):focus,
+.nith-theme textarea:focus,
+.nith-theme select:focus,
+.nith-theme .select-trigger:focus,
+.nith-theme .input:focus,
+.nith-theme input:not([type="checkbox"]):not([type="radio"]):focus-visible,
+.nith-theme textarea:focus-visible,
+.nith-theme select:focus-visible,
+.nith-theme .select-trigger:focus-visible,
+.nith-theme .input:focus-visible,
+.nith-theme [data-state="open"] .select-trigger {
+  border-color: #660000; /* Primary color */
+  outline-color: rgba(102, 0, 0, 0.5); /* Primary color with opacity */
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px rgba(102, 0, 0, 0.1); /* Primary color with opacity */
+}
+
+/* Style for the shadcn components that use the Ring */
+.nith-theme .ring-offset-background {
+  --ring-color: #660000; /* Primary color */
+}
+
+/* Style for form controls */
+.nith-theme .form-control {
+  border-color: #a52a2a; /* Secondary color */
+}
+
+.nith-theme .form-control:focus {
+  border-color: #660000; /* Primary color */
+}
+
+/* Custom styles for NITH theme buttons */
+.nith-theme button,
+.nith-theme .btn {
+  border-color: #660000; /* Primary color for borders */
+}
+
+/* Primary buttons in NITH theme */
+.nith-theme button:not([class*="outline"]):not([class*="ghost"]):not([class*="secondary"]),
+.nith-theme .btn:not([class*="outline"]):not([class*="ghost"]):not([class*="secondary"]) {
+  background-color: #660000; /* Primary color */
+  color: #fcf1b1; /* Background color for contrast */
+}
+
+.nith-theme button:not([class*="outline"]):not([class*="ghost"]):not([class*="secondary"]):hover,
+.nith-theme .btn:not([class*="outline"]):not([class*="ghost"]):not([class*="secondary"]):hover {
+  background-color: #990000; /* Tertiary red for hover */
+}
+
+/* Outline buttons */
+.nith-theme .btn-outline {
+  border: 2px solid #a52a2a; /* Secondary color */
+  color: #660000; /* Primary text color */
+  background: transparent;
+}
+
+.nith-theme .btn-outline:hover {
+  background-color: rgba(165, 42, 42, 0.1); /* Light tint on hover */
+  border-color: #990000; /* Tertiary red */
+}
+
+
+/* Ghost buttons in NITH theme */
+.nith-theme button[class*="ghost"],
+.nith-theme .btn[class*="ghost"] {
+  color: #660000; /* Primary color */
+}
+
+.nith-theme button[class*="ghost"]:hover,
+.nith-theme .btn[class*="ghost"]:hover {
+  background-color: rgba(102, 0, 0, 0.1); /* Primary color with opacity */
+}
+
+/* Secondary buttons in NITH theme */
+.nith-theme button[class*="secondary"],
+.nith-theme .btn[class*="secondary"] {
+  background-color: #a52a2a; /* Secondary color */
+  color: #fcf1b1; /* Background color for contrast */
+}
+
+.nith-theme button[class*="secondary"]:hover,
+.nith-theme .btn[class*="secondary"]:hover {
+  background-color: #990000; /* Tertiary red for hover */
+}
+
+/* Mobile menu button in NITH theme header */
+.nith-theme header .mobile-menu-button {
+  color: #faf0b3; /* Light yellow for icon */
+}
+
+.nith-theme header .mobile-menu-button:hover {
+  background-color: #990000; /* Slightly darker for hover */
+}
+
+/* Hide scrollbars but keep scrolling functionality */
+html,
+body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Hide scrollbars on all scrollable elements */
+.scrollable-content,
+div[class*="overflow-"],
+div[class*="scroll-"] {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollable-content::-webkit-scrollbar,
+div[class*="overflow-"]::-webkit-scrollbar,
+div[class*="scroll-"]::-webkit-scrollbar {
+  display: none;
+}
+
+/* Auth pages specific styling for NITH theme */
+.nith-theme .auth-page {
+  background-color: #fcf1b1 !important;
+}
+
+.nith-theme .auth-page h2 {
+  color: #660000 !important;
+}
+
+.nith-theme .auth-page p {
+  color: #990000 !important;
+}
+
+.nith-theme .auth-page a {
+  color: #a52a2a !important;
+}
+
+.nith-theme .auth-page a:hover {
+  color: #990000 !important;
+}
+
+.nith-theme .auth-page input {
+  background-color: #faf0b3 !important;
+  border-color: #a52a2a !important;
+  color: #660000 !important;
+}
+
+.nith-theme .auth-page input:focus {
+  border-color: #660000 !important;
+  box-shadow: 0 0 0 2px rgba(102, 0, 0, 0.2) !important;
+}
+
+.nith-theme .auth-page button[type="submit"] {
+  background-color: #660000 !important;
+  color: #fcf1b1 !important;
+  border-color: #660000 !important;
+}
+
+.nith-theme .auth-page button[type="submit"]:hover:not(:disabled) {
+  background-color: #990000 !important;
+}
+

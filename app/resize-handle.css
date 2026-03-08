@@ -1,0 +1,47 @@
+/* Custom resize handle styles */
+.resize-handle {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 16px;
+    height: 16px;
+    cursor: se-resize;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+  }
+  
+  .resize-handle:hover {
+    opacity: 1;
+  }
+  
+  .resize-handle-dots {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 1px;
+    width: 6px;
+    height: 6px;
+  }
+  
+  .resize-handle-dot {
+    width: 2px;
+    height: 2px;
+    background-color: currentColor;
+    border-radius: 50%;
+  }
+  
+  /* Add styles for when resizing is active */
+  .resizing * {
+    user-select: none !important;
+    pointer-events: none !important;
+  }
+  
+  .resizing {
+    cursor: se-resize !important;
+  }
+  
+  
